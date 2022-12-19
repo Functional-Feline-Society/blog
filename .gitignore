@@ -15,3 +15,5 @@ build/
 Gemfile.lock
 
 _site/
+
+Gemfile.lock
