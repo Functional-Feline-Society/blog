@@ -17,6 +17,16 @@ categories:
 This is the first post in a series walking through an example of a microservice with a Kafka integration using the Typelevel stack. We have chosen to showcase a simplified version of Santa's Ledger.  If you want to see the repo now, [click here](https://github.com/Functional-Feline-Society/santas-stream/).
 Unbeknownst to most, Santa's systems are actually supported by cats (the ones that go meow). The work here was kindly translated into English by our keepers.
 
+<table >
+    <tbody>
+      <tr>
+        <td ><img height=150px src="https://user-images.githubusercontent.com/3103/207422703-66e0f264-f8e2-4ae2-91d4-6bd0f3cc20be.png" alt="Megachu"> <br/>Megachu</td>
+        <td ><img height=150px src="https://raw.githubusercontent.com/K1nd/k1nd.github.io/gh-pages/assets/images/Bones.jpg" alt="Bones"><br/>Bones</td>
+        <td ><img height=150px src="https://raw.githubusercontent.com/K1nd/k1nd.github.io/gh-pages/assets/images/Dog.jpg" alt="Dog"><br/> Dog</td>
+      </tr>
+    </tbody>
+</table>
+
 ## Summary
 
 This series of posts is a report on our experience building and running Santa's Ledger, a well known, reliable system of gifting.
