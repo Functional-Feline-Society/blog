@@ -1,0 +1,1 @@
+one nitpick: I don't think you need Resource[IO, Stream[IO, Unit]] here - creating a Stream isn't side-effecting so you can just have Stream[IO, Unit] as the return type.
