@@ -2,13 +2,13 @@
 author: Bones, Dog and Megachu
 date: 2022-12-16 12:48:00+00:00
 layout: post
-title:  Case study: The digital transformation of Santa's logistical nightmare
+title:  "Case study: The digital transformation of Santa's logistical nightmare"
 categories:
 - scala
 - scala-cats
 - cats-effect
 - kafka
--fs2-kafka
+- fs2-kafka
 ---
 
 
