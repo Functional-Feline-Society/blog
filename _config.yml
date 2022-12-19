@@ -4,6 +4,6 @@ images:       /images
 name: Functional Feline Society
 title: Functional Feline Society
 description: Functional Feline Society's adventures in code.
-url: http://Functional-Feline-Society.github.io
+url: https://functional-feline-society.github.io/blog/
 plugins:
   - jekyll-feed
