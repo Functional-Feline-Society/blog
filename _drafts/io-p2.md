@@ -22,3 +22,26 @@ AS the loading of the config is now completed, we return to Main to find `Santas
 
 
 one nitpick: I don't think you need Resource[IO, Stream[IO, Unit]] here - creating a Stream isn't side-effecting so you can just have Stream[IO, Unit] as the return type.
+
+
+
+---
+In this blog post, we'd like to go through how Santa's workshop makes use of cats-effect (CE3) to bootstrap itself.
+
+Before we get started, we want to say that the Typelevel documentation on cats-effect is very complete and well written - so we'd strongly recommend reading through those if you haven't had any exposure to cats-effect yet.
+
+With that out of the way, let's get our paws wet and see how we can leverage CE3 to wrangle together all these gosh-darn side effects in our `Main` class.
+
+One of the first things you'll see is that this isn't a regular scala `App` but instead extends `IOApp.Simple`.
+This provides us with an entry point to our application which will evaluate an `IO[Unit]` that we give it.
+It also provides us with a number of dependencies we need right out of the box and handles interruption signals by cancelling our application and releasing resources.
+If you need access to either program arguments or the ability to return a specific exit code - you'll need to look at the standard `IOApp` variant.
+
+...BUNCH OF STUFF THAT I'VE YET TO REVIEW
+
+Side notes:
+Soon after starting we had to decide what style to write our application in. You'll frequently come across a pattern called 'Tagless Final' where implementations are expressed against an abstract `F[_]` effect type.
+We chose not to do this and to write our code directly against `IO[_]` to make the examples more accessible.
+
+In our example you will see IO as a type parameter to many traits. Some of them defined by libraries (like in the case of Env) and some are defined by us, type parameters work as usual and also they are sign of how we want to deal with all side effects.   
+(I don't think we define any F[_] ourselves??)
