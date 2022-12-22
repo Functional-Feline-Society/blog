@@ -10,7 +10,7 @@ categories:
 - kafka
 - fs2-kafka
 ---
-This is part two of a series. This is a link to [part one](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/).
+Welcome to part two of the series. A series? read all about it by following the link to [part one](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/).
 
 In this blog post, we'd like to go through how Santa's workshop makes use of cats-effect (CE3) to bootstrap itself.
 
@@ -58,7 +58,7 @@ Coming back to the definition of `run`, the last thing we want to do is initiali
   } yield ()
 ```  
 
-We do this by passing our configuration to `SantaServer.resource` which returns a `Resource[IO, Server]`. We allocate our resources and allow the program to run until terminated by calling `useForever` on the `Resource`. One minor thing to note here, is that we call `.unit` afterwards - this is because `useForever` has a return type of `Nothing` to indicate that the code will never return normally and this triggers a dead code warning from the compiler. We could refactor the code or use a no warning annotation here, but we opted for `.void` to change the type to `IO[Unit]` instead.
+We do this by passing our configuration to `SantaServer.resource` which returns a `Resource[IO, Server]`. We allocate our resources and allow the program to run until terminated by calling `useForever` on the [`Resource`](https://typelevel.org/cats-effect/docs/std/resource)(There will be more on using Resource in other posts). One minor thing to note here, is that we call `.unit` afterwards - this is because `useForever` has a return type of `Nothing` to indicate that the code will never return normally and this triggers a dead code warning from the compiler. We could refactor the code or use a no warning annotation here, but we opted for `.void` to change the type to `IO[Unit]` instead.
 As part of the application shutdown, finalizers run for the resources we initialised. This means all resources related to Kafka Consumers, Http4s Server, etc are all cleanly terminated… which is Nice. You’ll likely run into `Resource` quite often and it is talked about in the CE3 documentation we mentioned earlier, so if you’d like to learn more we’d recommend checking it out!
 
 
