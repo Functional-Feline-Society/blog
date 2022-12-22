@@ -63,9 +63,24 @@ As part of the application shutdown, finalizers run for the resources we initial
 
 
 
-Side notes:
+
+
+### Notes 
+
 Soon after starting we had to decide what style to write our application in. You'll frequently come across a pattern called 'Tagless Final' where implementations are expressed with an abstract `F[_]` effect type and dependencies commonly injected as context bounds.
 We chose not to do this and to write our code directly against `IO[_]` to make the examples more accessible.
 
 In our example you will see IO as a type parameter to many traits. Some of them defined by libraries (like in the case of Env) and some are defined by us, type parameters work as usual and also they are sign of how we want to deal with all side effects.  
 
+### Cat Tax!
+
+You made it all the way to the end!! wooo! Here is a picture of us! (the authors of this post!!)
+
+<table >
+    <tbody>
+      <tr>
+        <td ><img height=150px src="https://functional-feline-society.github.io/images/bones-and-dog-1.jpg" alt="Dog & Bones"><br/>Dog & Bones</td>        
+        <td ><img height=150px src="https://functional-feline-society.github.io/images/megachu-1.jpg" alt="Megachu"><br/>Megachu</td>       
+      </tr>
+    </tbody>
+</table>
