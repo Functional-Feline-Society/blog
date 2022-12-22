@@ -79,8 +79,8 @@ You made it all the way to the end!! wooo! Here is a picture of us! (the authors
 <table >
     <tbody>
       <tr>
-        <td ><img height=150px src="https://functional-feline-society.github.io/images/bones-and-dog-1.jpg" alt="Dog & Bones"><br/>Dog & Bones</td>        
-        <td ><img height=150px src="https://functional-feline-society.github.io/images/megachu-1.jpg" alt="Megachu"><br/>Megachu</td>       
+        <td ><img height=150px src="https://functional-feline-society.github.io/images/bones-and-dog-1.png" alt="Dog & Bones"><br/>Dog & Bones</td>        
+        <td ><img height=150px src="https://functional-feline-society.github.io/images/megachu-1.png" alt="Megachu"><br/>Megachu</td>       
       </tr>
     </tbody>
 </table>
