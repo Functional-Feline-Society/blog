@@ -7,3 +7,4 @@ description: Functional Feline Society's adventures in code.
 url: https://functional-feline-society.github.io/blog/
 plugins:
   - jekyll-feed
+  - jekyll-relative-links
