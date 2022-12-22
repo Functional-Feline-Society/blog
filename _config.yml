@@ -7,6 +7,7 @@ description: Functional Feline Society's adventures in code.
 url: https://functional-feline-society.github.io/blog/
 theme: minimal-mistakes-jekyll
 include: ["_pages"]
+highlighter: rouge
 defaults:
   # _posts
   - scope:

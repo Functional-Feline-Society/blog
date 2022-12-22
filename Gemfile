@@ -4,6 +4,7 @@ gem "jekyll", "~> 4.2"
 gem "webrick", "~> 1.7"
 
 gem "minimal-mistakes-jekyll"
+gem "rouge"
 
 group :jekyll_plugins do
   gem "jekyll-timeago", "~> 0.13.1"

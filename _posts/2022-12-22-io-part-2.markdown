@@ -22,16 +22,16 @@ This provides us with an entry point to our application which will evaluate an `
 It is also capable of handling interruption signals by cancelling our application and releasing resources.
 If you need access to either program arguments or the ability to return a specific exit code - you'll need to look at the standard `IOApp` variant.
 
-```
+{% highlight scala %}
 import cats.effect.{IO, IOApp}
 object Main extends IOApp.Simple {
   override def run: IO[Unit] = for {
   //...
-```
+{% endhighlight %}
 
 Carrying on to the definition of `loadKafkaConfigFromEnv` (see below) of `Main.scala`, we have some code that loads the necessary environment variables and if not those values are not there the whole application will fail with a `MissingConfig` error. We also want the return type of this definition to be `IO[KafkaConfig]`. A more common approach for production apps and configuration values is to use libraries such as [Ciris](https://github.com/vlovgr/ciris) or [PureConfig](https://github.com/pureconfig/pureconfig).
 
-```
+{% highlight scala %}
   private val loadKafkaConfigFromEnv = for {
     maybeBootstrapServers  <- Env[IO].get("BOOTSTRAP_SERVERS")
     maybeSchemaRegistryUrl <- Env[IO].get("SCHEMA_REGISTRY_URL")
@@ -41,21 +41,21 @@ Carrying on to the definition of `loadKafkaConfigFromEnv` (see below) of `Main.s
       )
       .liftTo[IO](MissingConfig)
   } yield kafkaConf
-```
+{% endhighlight %}
 
 To read environment variables we use `Env[IO]` which is part of CE3 and it's there for that very reason, pretty handy. On the second and third lines of the code above, we have the two `Option[String]` environment variables that we need to combine to complete our configuration - here you can see us using `mapN` to combine the options. We want our app to fail bootstrapping if the configuration is missing, so we use `liftTo` to convert `Option.None` into an `IO.Error(MissingConfig)`.
 
 
 Coming back to the definition of `run`, the last thing we want to do is initialise our application’s resources and run it forever until it receives an interrupt.
 
-```
+{% highlight scala %}
   override def run: IO[Unit] = for {
     _         <- IO.println("Loading config from ENV...")
     kafkaConf <- loadKafkaConfigFromEnv
     _         <- IO.println("Starting service...")
     _         <- SantasServer.resource(kafkaConf).useForever.void
   } yield ()
-```  
+{% endhighlight %}
 
 We do this by passing our configuration to `SantaServer.resource` which returns a `Resource[IO, Server]`. We allocate our resources and allow the program to run until terminated by calling `useForever` on the [`Resource`](https://typelevel.org/cats-effect/docs/std/resource)(There will be more on using Resource in other posts). One minor thing to note here, is that we call `.unit` afterwards - this is because `useForever` has a return type of `Nothing` to indicate that the code will never return normally and this triggers a dead code warning from the compiler. We could refactor the code or use a no warning annotation here, but we opted for `.void` to change the type to `IO[Unit]` instead.
 As part of the application shutdown, finalizers run for the resources we initialised. This means all resources related to Kafka Consumers, Http4s Server, etc are all cleanly terminated… which is Nice. You’ll likely run into `Resource` quite often and it is talked about in the CE3 documentation we mentioned earlier, so if you’d like to learn more we’d recommend checking it out!
