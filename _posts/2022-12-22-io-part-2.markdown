@@ -10,6 +10,7 @@ categories:
 - kafka
 - fs2-kafka
 ---
+This is part two of a series. This is a link to [part one](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/).
 
 In this blog post, we'd like to go through how Santa's workshop makes use of cats-effect (CE3) to bootstrap itself.
 
