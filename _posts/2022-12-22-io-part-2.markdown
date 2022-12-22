@@ -9,7 +9,7 @@ categories:
 - kafka
 - fs2-kafka
 ---
-Welcome to part two of the series. A series? read all about it by following the link to [part one](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/).
+Welcome to part two of the series. "A series?", you ask. Read all about it by following the link to [part one](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/).
 
 In this blog post, we'd like to go through how Santa's workshop makes use of cats-effect (CE3) to bootstrap itself.
 
