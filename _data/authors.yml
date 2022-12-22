@@ -1,0 +1,11 @@
+Navigation kitten:
+  name: Navigation kitten
+  bio         : "What do you want, tuna? I am a very extravagant cat."
+  avatar      : "/images/ffs.png"
+  links:
+    - label: "Website"
+      icon: "fas fa-fw fa-link"
+      url: "https://functional-feline-society.github.io/"
+    - label: "Github"
+      icon: "fab fa-fw fa-github"
+      url: "https://github.com/functional-Feline-Society"

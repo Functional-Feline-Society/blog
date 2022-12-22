@@ -5,6 +5,32 @@ name: Functional Feline Society
 title: Functional Feline Society
 description: Functional Feline Society's adventures in code.
 url: https://functional-feline-society.github.io/blog/
+theme: minimal-mistakes-jekyll
+include: ["_pages"]
+defaults:
+  # _posts
+  - scope:
+      path: ""
+      type: posts
+    values:
+      layout: single
+      author_profile: true
+      read_time: true
+      comments: true
+      share: true
+      related: true
+  # _pages
+  - scope:
+      path: ""
+      type: pages
+    values:
+      layout: single
+  # _foo
+  - scope:
+      path: ""
+      type: foo
+    values:
+      layout: single
 plugins:
   - jekyll-feed
   - jekyll-relative-links
