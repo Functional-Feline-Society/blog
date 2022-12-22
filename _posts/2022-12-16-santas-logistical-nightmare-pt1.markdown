@@ -97,5 +97,3 @@ The requirements are as follows:
 We'll dive deeper into some of the technologies used over a series of blog posts throughout the festive period. If you have any preference in order, please let us know.
 
 
-This blog post was supervised by [Andrea Magnorsky](http://www.roundcrisis.com/) and [Elias Court](http://k1nd.ltd)
-
