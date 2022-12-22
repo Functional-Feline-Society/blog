@@ -2,7 +2,7 @@
 author: Bones, Dog and Megachu
 date: 2022-12-22 08:48:00+00:00
 layout: post
-title:  "Part 2: IO"
+title:  "Case study: The digital transformation of Santa's logistical nightmare - Part 2"
 categories:
 - scala
 - scala-cats
@@ -23,29 +23,40 @@ It is also capable of handling interruption signals by cancelling our applicatio
 If you need access to either program arguments or the ability to return a specific exit code - you'll need to look at the standard `IOApp` variant.
 
 ```
-INSERT CODE SAMPLE FOR IOApp
+import cats.effect.{IO, IOApp}
+object Main extends IOApp.Simple {
+  override def run: IO[Unit] = for {
+  //...
 ```
 
-Carrying on to the definition of `loadKafkaConfigFromEnv` on line 16 of `Main.scala`, we have some code that loads the necessary environment variables and if not those values are not there the whole application will fail with a `MissingConfig` error. We also want the return type of this definition to be `IO[KafkaConfig]`. A more common approach for production apps and configuration values is to use libraries such as Ciris or Pure Config.
+Carrying on to the definition of `loadKafkaConfigFromEnv` on line 16 of `Main.scala`, we have some code that loads the necessary environment variables and if not those values are not there the whole application will fail with a `MissingConfig` error. We also want the return type of this definition to be `IO[KafkaConfig]`. A more common approach for production apps and configuration values is to use libraries such as [Ciris](https://github.com/vlovgr/ciris) or [PureConfig](https://github.com/pureconfig/pureconfig).
 
 To read environment variables we use `Env[IO]` which is part of CE3 and it's there for that very reason, pretty handy. On line 19, we have the two `Option[String]` environment variables that we need to combine to complete our configuration - here you can see us using `mapN` to combine the options. We want our app to fail bootstrapping if the configuration is missing, so on line 23 we use `liftTo` to convert `Option.None` into an `IO.Error(MissingConfig)`.
 
 ```
-INSERT CODE SAMPLE FOR Config loading
+  private val loadKafkaConfigFromEnv = for {
+    maybeBootstrapServers  <- Env[IO].get("BOOTSTRAP_SERVERS")
+    maybeSchemaRegistryUrl <- Env[IO].get("SCHEMA_REGISTRY_URL")
+    kafkaConf <- (maybeBootstrapServers, maybeSchemaRegistryUrl)
+      .mapN((bootstrapServers, schemaRegistryUrl) =>
+        KafkaConfig(bootstrapServers, AvroSettings(SchemaRegistryClientSettings[IO](schemaRegistryUrl)))
+      )
+      .liftTo[IO](MissingConfig)
+  } yield kafkaConf
 ```
 
-//Should we mention finalizers in this sentence and how?
 Coming back to line 13, the last thing we want to do is initialise our application’s resources and run it forever until it receives an interrupt.
 We do this by passing our configuration to `SantaServer.resource` which returns a `Resource[IO, Server]`. We allocate our resources and allow the program to run until terminated by calling `useForever` on the `Resource`. One minor thing to note here, is that we call `.unit` afterwards - this is because `useForever` has a return type of `Nothing` to indicate that the code will never return normally and this triggers a dead code warning from the compiler. We could refactor the code or use a no warning annotation here, but we opted for `.void` to change the type to `IO[Unit]` instead.
 As part of the application shutdown, finalizers run for the resources we initialised. This means all resources related to Kafka Consumers, Http4s Server, etc are all cleanly terminated… which is Nice. You’ll likely run into `Resource` quite often and it is talked about in the CE3 documentation we mentioned earlier, so if you’d like to learn more we’d recommend checking it out!
 
 ```
-INSERT CODE SAMPLE FOR Resource
+    _         <- IO.println("Starting service...")
+    _         <- SantasServer.resource(kafkaConf).useForever.void
 ```
 
 Side notes:
-Soon after starting we had to decide what style to write our application in. You'll frequently come across a pattern called 'Tagless Final' where implementations are expressed with an abstract `F[_]` effect type with dependencies commonly injected as context bounds.
+Soon after starting we had to decide what style to write our application in. You'll frequently come across a pattern called 'Tagless Final' where implementations are expressed with an abstract `F[_]` effect type and dependencies commonly injected as context bounds.
 We chose not to do this and to write our code directly against `IO[_]` to make the examples more accessible.
 
 In our example you will see IO as a type parameter to many traits. Some of them defined by libraries (like in the case of Env) and some are defined by us, type parameters work as usual and also they are sign of how we want to deal with all side effects.  
-(I don't think we define any F[_] ourselves??)
+
