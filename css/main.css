@@ -142,6 +142,11 @@ h1 a:hover {
 /*
 /*****************************************************************************/
 
+.post {
+  margin: 1em;
+  padding: 1em;
+}
+
 /* standard */
 .post pre {
   border: 1px solid #ddd;
