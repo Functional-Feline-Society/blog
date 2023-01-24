@@ -1,0 +1,92 @@
+---
+author: Bones, Dog and Megachu
+date: 2023-01-24 08:48:00+00:00
+title:  "Case study: The digital transformation of Santa's logistical nightmare - Part 3 fs2-kafka"
+categories:
+- scala
+- scala-cats
+- cats-effect
+- kafka
+- fs2-kafka
+---
+Welcome to part two of the series. "A series?", you ask. Read all about it by following the link to [part one](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/).
+
+In this blog post, we'd like to go through how Santa's workshop makes use of cats-effect (CE3) to bootstrap itself.
+
+In this post we’ll go through the usage of fs2-Kafka in consuming behaviour reports. Fs2-Kafka is a wrapper for Java’s Kafka library that provides a nice level of abstraction for working with Kafka in the typelevel ecosystem. Together with using Vulcan to create your avro codecs it provides a pleasant development experience.
+
+We’ll chiefly be looking at `BehaviourReportConsumer.scala` which is one of the two Kafka consumers we have in this project. The code demonstrates how to connect to a Kafka cluster, subscribe to a topic, consume and deserialise messages and then finally commit their offset. Let's get started!
+
+Starting from the top of the class you can see we first define a couple of deserialisers.
+These depend on Vulcan codecs we’ve defined (we’ll get into this shortly) and schema registry settings to be initialised.
+
+Our Vulcan codecs are located in `src/main/scala/com/northpole/santas/domain.scala` and are derived using vulcan-generic.
+These define how to convert between our case classes and avro and back again - as well as the avro schema. Alternatively you can also hand write these for a more robust solution - by specifying exactly which property names should be used when serialising these fields, they become more resistant to bugs being accidentally introduced when refactoring code. 
+
+The schema registry settings are required so that kafka publishers know where to register new updated schemas and kafka consumers know where to go and find the corresponding schema for a kafka message. (Our avro messages contain the ID of the schema that they were generated for)
+
+
+Moving on, line 21 of BehaviourReportConsumer.scala has us create our consumer configuration - this uses the two serializers we defined earlier to know how to deserialise the kafka record key and value.
+We also configure it with ‘bootstrapServers’ so that the consumer knows how to connect to the kafka cluster.
+We also specify an auto offset reset so that in the event that this is the first consumer to connect (or more specifically, there are no offsets for the consumer group) it knows where to start consuming off the topic from - in this case, from the `Earliest` available message.
+Finally, we configure it with a consumer group ID - this defines the ‘group’ of consumers that work together to consume kafka messages off of topics and the topic offsets are stored for the group. It impacts consumer partition balancing,fault tolerance and more.
+
+Further down in `consumeWith` we’re going to:
+Create our consumer
+Specify what to do with the consumed messages
+and finally commit the record offsets after they’ve been processed.
+We first create a consumer resource on line 31 and then subscribe to our behaviour report topic so that it looks for new messages there on line 34.
+You can see here we’ve used  fs2’s `evalTap` - this is a method on `Stream` that lets us evaluate an `F[_]` for its side effects and keeps hold of original value.
+In the last step, we get the record stream using `_.stream` and tap each message with `processReport`to save it before finally passing it through to `commitBatchWithin`.
+ `commitBatchWithin` is a helper from fs2-Kafka which returns a `Pipe` that takes care of committing your offsets in batches (of either max batch size or after the max interval elapses).
+It also takes care of ensuring that commits are sent in their original ordering.
+An fs2 Pipe is a lambda function that describes how to transform one fs2 Stream into another fs2 Stream. 
+
+Some of you may be wondering why this consumeWithin returns a `Resource[IO, fs2.Stream[IO, Unit]]`  instead of a flattened Stream - which we could’ve achieved with `Stream.resource` and `flatMap`.
+This is because we’d like our application’s bootstrapper and tests to be able to identify when Consumers have been allocated/started - which would be difficult with a flattened Stream.
+
+## Producer
+
+We will revise setting up integration tests in a separate post, however, we wanted to show you how to publish messages to Kafka.
+Let's switch files to `NaughtyNiceReportSpec.scala`. We’ll first start by looking at how we configure and use our producer.
+
+We first set up our schema registry configuration for avro and our serialisers just like we did earlier in the consumer example. (Lines 65 - 77)
+Then, we need to create a `ProducerSettings` instance to capture these serialisers and configure how to connect to the Kafka cluster. (Lines 80-87)
+Finally, we create our `Resource[IO, KafkaProducer]` using `ProducerSettings` - ready to be used to produce messages.
+
+If you go further down to line 98, you’ll see we’re using an fs2-Kafka method called `produceOne_` to publish a `ProducerRecord`, the return type is `F[F[Unit]]`. There’s a lot to unpack here. There are a handful of methods available that can be used to produce messages but we’re using `produceOne_` because:
+We’re not interested in the metadata returned when the record is published (hence the trailing `_` in the method name)
+We only want to produce a single record (hence `produceOne`)
+This method takes a `ProducerRecord` as an argument - this type captures the key and value to be produced and the topic to be published to.
+Finally, let's break down the `F[F[Unit]]` response type: 
+the outer `F[_]` here captures the effect of submitting the record to our producer’s buffer
+The inner `F[_]` blocks on acknowledgement of the record being received by the kafka cluster.
+We’re flattening these two effects in our test case because we just want to make sure that the records are published - but in practice blocking on the inner `F[_]` one at a time will yield suboptimal performance. It is recommended that multiple inner effects are evaluated in parallel.
+
+## Conclusion
+
+
+As we are at the end of this post, we reflect on how hard it was to follow the code to connect to a Kafka cluster, subscribe to a topic, consume and deserialise messages and then commit their offset. We hope that it was simpler than you expected (can you let us know if not? and what you did think about it). 
+This is only possible because we are leveraging the powerful constructs provided by the Kafka Java library, fs2, cats effects, etc, and of course functional programming.
+These tools are supposed to make our lives as programmers easier and simpler, they should make it harder for us to make mistakes. 
+As usual, we would really like to know what you learned from this, or whatever questions you might have after reading this post so that we can make it better.
+
+Next post coming soon 🔜
+
+
+
+
+
+
+### Cat Tax!
+
+You made it all the way to the end!! wooo! Here is a picture of us! (the authors of this post!!)
+
+<table >
+    <tbody>
+      <tr>
+        <td ><img height=150px src="https://functional-feline-society.github.io/images/bones-and-dog-1.png" alt="Dog & Bones"><br/><a href="https://functional-feline-society.github.io/images/bones-and-dog-1.png" target="_blank"> Dog & Bones</a></td>        
+        <td ><img height=150px src="https://functional-feline-society.github.io/images/megachu-1.png" alt="Megachu"><br/><a href="https://functional-feline-society.github.io/images/megachu-1.png" target="_blank">Megachu</a></td>       
+      </tr>
+    </tbody>
+</table>
