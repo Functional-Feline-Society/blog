@@ -35,7 +35,7 @@ implicit val behaviourReportDeserializer
 avroDeserializer[BehaviourReport].using(config.avroSettings)
 {% endhighlight %}
 
-Our Vulcan codecs are located in [`src/main/scala/com/northpole/santas/domain.scala`](https://github.com/Functional-Feline-Society/santas-stream/blob/main/src/main/scala/com/northpole/santas/domain.scala) and are derived using vulcan-generic.
+Our Vulcan codecs are located in `domain.scala` ([link](https://github.com/Functional-Feline-Society/santas-stream/blob/main/src/main/scala/com/northpole/santas/domain.scala)) and are derived using vulcan-generic.
 These define how to convert between our case classes and avro and back again - as well as the avro schema. Alternatively you can also handwrite these for a more robust solution - by specifying exactly which property names should be used when serialising these fields, they become more resistant to bugs being accidentally introduced when refactoring code. 
 
 The schema registry settings are required so that our kafka publishers know where to register new updated schemas and kafka consumers know where to go and find the corresponding schema for a kafka message. (Our avro messages contain the ID of the schema that they were generated for)
