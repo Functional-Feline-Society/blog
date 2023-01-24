@@ -13,11 +13,11 @@ categories:
 ---
 
 Welcome to part three of the series. "A series?" yes, these are the posts we have so far 
-* Santa's logistical nightmare [Introduction - Part 1](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/). In this post we discussed the high level of the problem and why we are doing this series of posts.
-* Santa's logistical nightmare [Cats Effect - Part 2](https://functional-feline-society.github.io/2022/12/22/io-part-2/). In this post we go over how we use cats effects in this example.
+* Santa's logistical nightmare [Introduction - Part 1](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/). Here you can find a high level of the problem we are trying to address and why we are doing this series of posts.
+* Santa's logistical nightmare [Cats Effect - Part 2](https://functional-feline-society.github.io/2022/12/22/io-part-2/). In that post we go over how we use cats effects in this example.
 
 
-In this post we’ll go through the usage of [FS2-Kafka](https://fd4s.github.io/fs2-kafka/) in consuming behaviour reports. FS2-Kafka is a wrapper for Java’s Kafka library that provides a nice level of abstraction for working with Kafka in the typelevel ecosystem. Together with using [Vulcan](https://fd4s.github.io/vulcan/) to create your [Avro](https://avro.apache.org/) codecs it provides a pleasant development experience.
+Finally, in this post we’ll go through the usage of [FS2-Kafka](https://fd4s.github.io/fs2-kafka/) in consuming behaviour reports. FS2-Kafka is a wrapper for Java’s Kafka library that provides a nice level of abstraction for working with Kafka in the typelevel ecosystem. Together with using [Vulcan](https://fd4s.github.io/vulcan/) to create your [Avro](https://avro.apache.org/) codecs it provides a pleasant development experience.
 
 ## Consumer 
 
@@ -35,7 +35,7 @@ implicit val behaviourReportDeserializer
 avroDeserializer[BehaviourReport].using(config.avroSettings)
 {% endhighlight %}
 
-Our Vulcan codecs are located in `src/main/scala/com/northpole/santas/domain.scala` and are derived using vulcan-generic.
+Our Vulcan codecs are located in [`src/main/scala/com/northpole/santas/domain.scala`](https://github.com/Functional-Feline-Society/santas-stream/blob/main/src/main/scala/com/northpole/santas/domain.scala) and are derived using vulcan-generic.
 These define how to convert between our case classes and avro and back again - as well as the avro schema. Alternatively you can also handwrite these for a more robust solution - by specifying exactly which property names should be used when serialising these fields, they become more resistant to bugs being accidentally introduced when refactoring code. 
 
 The schema registry settings are required so that our kafka publishers know where to register new updated schemas and kafka consumers know where to go and find the corresponding schema for a kafka message. (Our avro messages contain the ID of the schema that they were generated for)
@@ -94,6 +94,7 @@ We will revise setting up integration tests in a separate post, however, we want
 Let's switch files to `NaughtyNiceReportSpec.scala`. We’ll first start by looking at how we configure and use our producer.
 
 We first set up our schema registry configuration for avro and our serialisers just like we did earlier in the consumer example. (Lines 65 - 77)
+
 {% highlight scala %}
 val avroSettings =
 AvroSettings(
@@ -102,6 +103,7 @@ SchemaRegistryClientSettings[IO](s"http://localhost:$registryPort")
 {% endhighlight %}
 
 Then, we need to create a `ProducerSettings` instance to capture these serialisers and configure how to connect to the Kafka cluster. (Lines 80-87)
+
 {% highlight scala %}
 val behaviourReportProducer =
 ProducerSettings[IO, FullName, BehaviourReport].withBootstrapServers(
