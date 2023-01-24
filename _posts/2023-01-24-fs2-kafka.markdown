@@ -28,11 +28,12 @@ These depend on Vulcan codecs we’ve defined (we’ll get into this shortly) an
 
 {% highlight scala %}
 implicit val fullNameDeserializer: RecordDeserializer[IO, FullName] =
-avroDeserializer[FullName].using(config.avroSettings)
+  avroDeserializer[FullName].using(config.avroSettings)
 
-implicit val behaviourReportDeserializer
-: RecordDeserializer[IO, BehaviourReport] =
-avroDeserializer[BehaviourReport].using(config.avroSettings)
+
+implicit val behaviourReportDeserializer : RecordDeserializer[IO, BehaviourReport] =
+  avroDeserializer[BehaviourReport].using(config.avroSettings)
+  
 {% endhighlight %}
 
 Our Vulcan codecs are located in `domain.scala` ([link](https://github.com/Functional-Feline-Society/santas-stream/blob/main/src/main/scala/com/northpole/santas/domain.scala)) and are derived using vulcan-generic.
@@ -41,13 +42,16 @@ These define how to convert between our case classes and avro and back again - a
 The schema registry settings are required so that our kafka publishers know where to register new updated schemas and kafka consumers know where to go and find the corresponding schema for a kafka message. (Our avro messages contain the ID of the schema that they were generated for)
 
 
-Moving on, line 21 of BehaviourReportConsumer.scala has us create our consumer configuration - this uses the two serializers we defined earlier to know how to deserialise the kafka record key and value.
+Moving on,in BehaviourReportConsumer.scala we create our consumer configuration - this uses the two serialisers we defined earlier to know how to deserialise the kafka record key and value.
+
 {% highlight scala %}
-private val behaviourConsumerSettings =
-ConsumerSettings[IO, FullName, BehaviourReport]
-.withAutoOffsetReset(AutoOffsetReset.Earliest)
-.withBootstrapServers(config.bootstrapServers)
-.withGroupId("Rudolph")
+
+private val behaviourConsumerSettings = 
+  ConsumerSettings[IO, FullName, BehaviourReport]
+    .withAutoOffsetReset(AutoOffsetReset.Earliest)
+    .withBootstrapServers(config.bootstrapServers)
+    .withGroupId("Rudolph")
+
 {% endhighlight %}
 
 The `ConsumerSettings` need to be configured with ‘bootstrapServers’ so that the consumer knows how to connect to the kafka cluster.
@@ -56,59 +60,59 @@ Finally, we configure it with a consumer group ID - this defines the ‘group’
 
 {% highlight scala %}
 
-def consumeWith(
-processReport: (FullName, BehaviourReport) => IO[Unit]
-): Resource[IO, fs2.Stream[IO, Unit]] =
-KafkaConsumer
-.resource(behaviourConsumerSettings)
-.evalTap(
-_.subscribeTo(BehaviourReportTopic)
-)
-.map(
-_.stream
-.evalTap(r => processReport(r.record.key, r.record.value))
-.map(_.offset)
-.through(commitBatchWithin(500, 15.seconds))
-)
+def consumeWith(processReport: (FullName, BehaviourReport) => IO[Unit]): 
+Resource[IO, fs2.Stream[IO, Unit]] =
+
+    KafkaConsumer
+    .resource(behaviourConsumerSettings)
+    .evalTap(_.subscribeTo(BehaviourReportTopic))
+    .map(
+      _.stream
+      .evalTap(r => processReport(r.record.key, r.record.value))
+      .map(_.offset)
+      .through(commitBatchWithin(500, 15.seconds))
+    )
 
 {% endhighlight %}
 
 Further down in `consumeWith` we’re going to:
+
 * Create our consumer
 * Specify what to do with the consumed messages
-* And finally commit the record offsets after they’ve been processed.
+* Commit the record offsets after they’ve been processed.
 
-As you can see on the snippet about, we first create a consumer resource and then subscribe to our behaviour report topic so that it looks for new messages.
-You can see here we’ve used  FS2’s [`evalTap`](https://www.javadoc.io/doc/co.fs2/fs2-docs_2.13/3.5.0/fs2/Stream.html#evalTap[F2[x]%3E:F[x],O2](f:O=%3EF2[O2])(implicitevidence$9:cats.Functor[F2]):fs2.Stream[F2,O]) - this is a method on `Stream` that lets us evaluate an `F[_]` for its side effects and keeps hold of original value.
+As you can see on the snippet above, we first create a consumer resource and then subscribe to our behaviour report topic so that it looks for new messages.
+We’ve used  FS2’s [`evalTap`](https://www.javadoc.io/doc/co.fs2/fs2-docs_2.13/3.5.0/fs2/Stream.html#evalTap[F2[x]%3E:F[x],O2](f:O=%3EF2[O2])(implicitevidence$9:cats.Functor[F2]):fs2.Stream[F2,O]) - this is a method on `Stream` that lets us evaluate an `F[_]` for its side effects and keeps hold of original value.
 In the last step, we get the record stream using `_.stream` and tap each message with `processReport`to save it before finally passing it through to `commitBatchWithin`.
- `commitBatchWithin` is a helper from FS2-Kafka which returns a `Pipe` that takes care of committing your offsets in batches (of either max batch size or after the max interval elapses).
-It also takes care of ensuring that commits are sent in their original ordering.
+ `commitBatchWithin` is a helper from FS2-Kafka which returns a `Pipe` that takes care of committing your offsets in batches (of either max batch size or after the max interval elapses).  It also takes care of ensuring that commits are sent in their original ordering.
 An FS2 Pipe is a lambda function that describes how to transform one FS2 Stream into another FS2 Stream. 
 
-Some of you may be wondering why this consumeWithin returns a `Resource[IO, fs2.Stream[IO, Unit]]`  instead of a flattened Stream - which we could’ve achieved with `Stream.resource` and `flatMap`.
-This is because we’d like our application’s bootstrapper and tests to be able to identify when Consumers have been allocated/started - which would be difficult with a flattened Stream.
+Some of you may be wondering why `consumeWithin` returns a `Resource[IO, fs2.Stream[IO, Unit]]`  instead of a flattened Stream - which we could’ve achieved with `Stream.resource` and `flatMap`.  This is because we’d like our application’s bootstrapper and tests to be able to identify when Consumers have been allocated/started - which would be difficult with a flattened Stream.
 
 ## Producer
 
-We will revise setting up integration tests in a separate post, however, we wanted to show you how to publish messages to Kafka.
-Let's switch files to `NaughtyNiceReportSpec.scala`. We’ll first start by looking at how we configure and use our producer.
+We will revise our integration tests approach in a separate post, however, we wanted to show  how to publish messages to Kafka.
+Have a look at `NaughtyNiceReportSpec.scala`. We'll start by looking at how we configure and use our producer.
 
 We first set up our schema registry configuration for avro and our serialisers just like we did earlier in the consumer example. (Lines 65 - 77)
 
 {% highlight scala %}
-val avroSettings =
-AvroSettings(
-SchemaRegistryClientSettings[IO](s"http://localhost:$registryPort")
-)
+
+val avroSettings = AvroSettings(
+  SchemaRegistryClientSettings[IO](s"http://localhost:$registryPort")
+  )
+
 {% endhighlight %}
 
 Then, we need to create a `ProducerSettings` instance to capture these serialisers and configure how to connect to the Kafka cluster. (Lines 80-87)
 
 {% highlight scala %}
-val behaviourReportProducer =
-ProducerSettings[IO, FullName, BehaviourReport].withBootstrapServers(
-kafkaContainer.bootstrapServers
-)
+
+val behaviourReportProducer = 
+  ProducerSettings[IO, FullName, BehaviourReport].withBootstrapServers(
+    kafkaContainer.bootstrapServers
+  )
+
 {% endhighlight %}
 
 Finally, we create our `Resource[IO, KafkaProducer]` using `ProducerSettings` - ready to be used to produce messages.
@@ -116,17 +120,18 @@ Finally, we create our `Resource[IO, KafkaProducer]` using `ProducerSettings` - 
 KafkaProducer.resource(behaviourReportProducer)
 {% endhighlight %}
 
-If you go further down to line 98, you’ll see we’re using an FS2-Kafka method called `produceOne_` to publish a `ProducerRecord`, the return type is `F[F[Unit]]`. There’s a lot to unpack here.
+If you go further down the file you’ll see we’re using an FS2-Kafka method called `produceOne_` to publish a `ProducerRecord`, the return type is `F[F[Unit]]`. There’s a lot to unpack here.
+
 {% highlight scala %}
-behaviourReportProducer
-.produceOne_(
-ProducerRecord(
-BehaviourReportTopic,
-MegachusFullName,
-BehaviourReport(ExpectedScore)
-)
-)
-.flatten
+
+behaviourReportProducer.produceOne_(
+  ProducerRecord(
+    BehaviourReportTopic,
+    MegachusFullName,
+    BehaviourReport(ExpectedScore)
+  )
+).flatten
+
 {% endhighlight %}
 
 There are a handful of methods available that can be used to produce messages but we’re using `produceOne_` because:
@@ -135,8 +140,10 @@ There are a handful of methods available that can be used to produce messages bu
 
 This method takes a `ProducerRecord` as an argument - this type captures the key and value to be produced and the topic to be published to.
 Finally, let's break down the `F[F[Unit]]` response type: 
-the outer `F[_]` here captures the effect of submitting the record to our producer’s buffer
-The inner `F[_]` blocks on acknowledgement of the record being received by the kafka cluster.
+
+* The outer `F[_]` here captures the effect of submitting the record to our producer’s buffer
+* The inner `F[_]` blocks on acknowledgement of the record being received by the kafka cluster.
+
 We’re flattening these two effects in our test case because we just want to make sure that the records are published - but in practice blocking on the inner `F[_]` one at a time will yield suboptimal performance. It is recommended that multiple inner effects are evaluated in parallel.
 
 ## Conclusion
