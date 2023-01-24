@@ -159,7 +159,7 @@ You made it all the way to the end!! wooo! Here is a picture of us! (the authors
 <table >
     <tbody>
       <tr>
-        <td ><img height=150px src="https://functional-feline-society.github.io/images/dog-1.jpg" alt="Rockstar Dog"><br/><a href="https://functional-feline-society.github.io/images/dog-1.jpg" target="_blank"> Rockstar Dog</a></td>        
+        <td ><img width=150px src="https://functional-feline-society.github.io/images/dog-1.jpg" alt="Rockstar Dog"><br/><a href="https://functional-feline-society.github.io/images/dog-1.jpg" target="_blank"> Rockstar Dog</a></td>        
         <td ><img height=150px src="https://functional-feline-society.github.io/images/megachu-2.jpeg" alt="Megachu chilling"><br/><a href="https://functional-feline-society.github.io/images/megachu-2.jpeg" target="_blank">Megachu</a></td>       
       </tr>
     </tbody>
