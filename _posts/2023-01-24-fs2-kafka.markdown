@@ -14,16 +14,18 @@ categories:
 
 Welcome to part three of the series. "A series?" yes, these are the posts we have so far 
 * Santa's logistical nightmare [Introduction - Part 1](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/). Here you can find a high level of the problem we are trying to address and why we are doing this series of posts.
-* Santa's logistical nightmare [Cats Effect - Part 2](https://functional-feline-society.github.io/2022/12/22/io-part-2/). In that post we go over how we use cats effects in this example.
+* Santa's logistical nightmare [Cats Effect - Part 2](https://functional-feline-society.github.io/2022/12/22/io-part-2/). In that post we go over how we use Cats Effect in our example.
 
 
-Finally, in this post we’ll go through the usage of [FS2-Kafka](https://fd4s.github.io/fs2-kafka/) in consuming behaviour reports. FS2-Kafka is a wrapper for Java’s Kafka library that provides a nice level of abstraction for working with Kafka in the typelevel ecosystem. Together with using [Vulcan](https://fd4s.github.io/vulcan/) to create your [Avro](https://avro.apache.org/) codecs it provides a pleasant development experience.
+Finally, in this post we’ll go through our usage of [FS2-Kafka](https://fd4s.github.io/fs2-kafka/) in consuming behaviour reports. FS2-Kafka is a wrapper for Java’s Kafka library that provides a nice level of abstraction for working with Kafka in the typelevel ecosystem. Together with using [Vulcan](https://fd4s.github.io/vulcan/) to create your [Avro](https://avro.apache.org/) codecs it provides a pleasant development experience.
 
 ## Consumer 
 
-We’ll chiefly be looking at `BehaviourReportConsumer.scala` which is one of the two Kafka consumers we have in this project. The code demonstrates how to connect to a Kafka cluster, subscribe to a topic, consume and deserialise messages and then finally commit their offset. Let's get started!
+We’ll chiefly be looking at [`BehaviourReportConsumer.scala`](https://github.com/Functional-Feline-Society/santas-stream/blob/5ef37d2b046446a693ad076b1ccef901d46d6152/src/main/scala/com/northpole/santas/BehaviourReportConsumer.scala) which is one of the two Kafka consumers we have in this project. The code demonstrates how to connect to a Kafka cluster, subscribe to a topic, consume and deserialise messages and then finally commit their offset. Let's get started!
 
-Starting from the top of the class you can see we first define a couple of deserialisers.
+
+### Deserialisers
+Starting from near the top of the class you can see we first instantiate a couple of `RecordDeserializer` objects.
 These depend on Vulcan codecs we’ve defined (we’ll get into this shortly) and schema registry settings to be initialised.
 
 {% highlight scala %}
@@ -36,13 +38,13 @@ implicit val behaviourReportDeserializer : RecordDeserializer[IO, BehaviourRepor
   
 {% endhighlight %}
 
-Our Vulcan codecs are located in `domain.scala` ([link](https://github.com/Functional-Feline-Society/santas-stream/blob/main/src/main/scala/com/northpole/santas/domain.scala)) and are derived using vulcan-generic.
-These define how to convert between our case classes and avro and back again - as well as the avro schema. Alternatively you can also handwrite these for a more robust solution - by specifying exactly which property names should be used when serialising these fields, they become more resistant to bugs being accidentally introduced when refactoring code. 
+Our Vulcan codecs are located in [`domain.scala`](https://github.com/Functional-Feline-Society/santas-stream/blob/main/src/main/scala/com/northpole/santas/domain.scala) and are derived using [Vulcan-Generic](https://fd4s.github.io/vulcan/docs/modules#generic).
+These define how to convert between our case classes and avro and back again - as well as the avro schema. Alternatively, you can make your Vulcan codecs more resistant to bugs being accidentally introduced when refactoring code by [handwriting them](https://fd4s.github.io/vulcan/docs/codecs#records) and specifying exactly which property names should be used when serialising these fields.
 
-The schema registry settings are required so that our kafka publishers know where to register new updated schemas and kafka consumers know where to go and find the corresponding schema for a kafka message. (Our avro messages contain the ID of the schema that they were generated for)
+The schema registry settings are required so that our kafka publishers know where to register new updated schemas and kafka consumers know where to go and find the corresponding schema for a kafka message. (Avro messages contain the ID of the schema that they were serialized with)
 
-
-Moving on,in BehaviourReportConsumer.scala we create our consumer configuration - this uses the two serialisers we defined earlier to know how to deserialise the kafka record key and value.
+### Configuration
+Moving on, further down in [`BehaviourReportConsumer.scala`](https://github.com/Functional-Feline-Society/santas-stream/blob/5ef37d2b046446a693ad076b1ccef901d46d6152/src/main/scala/com/northpole/santas/BehaviourReportConsumer.scala) we create our consumer configuration - this uses the two serialisers we defined earlier to know how to deserialise the kafka record key and value.
 
 {% highlight scala %}
 
@@ -54,10 +56,18 @@ private val behaviourConsumerSettings =
 
 {% endhighlight %}
 
-The `ConsumerSettings` need to be configured with ‘bootstrapServers’ so that the consumer knows how to connect to the kafka cluster.
-We also specify an auto offset reset so that in the event that this is the first consumer to connect (or more specifically, there are no offsets for the consumer group) it knows where to start consuming off the topic from - in this case, from the `Earliest` available message.
+The `ConsumerSettings` need to be configured with `bootstrapServers` so that the consumer knows how to connect to the kafka cluster.
+We also specify an `AutoOffsetReset` value so that in the event that this is the first consumer to connect (or more specifically, there are no offsets for the consumer group) it knows where to start consuming off the topic from.
+In this case, we've specified that it should be from the `Earliest` available message.
+
 Finally, we configure it with a consumer group ID - this defines the ‘group’ of consumers that work together to consume kafka messages off of topics and the topic offsets are stored for the group. It impacts consumer partition balancing, fault tolerance and more.
 
+### Streaming from the consumer
+Towards the end of [`BehaviourReportConsumer.scala`](https://github.com/Functional-Feline-Society/santas-stream/blob/5ef37d2b046446a693ad076b1ccef901d46d6152/src/main/scala/com/northpole/santas/BehaviourReportConsumer.scala) in [`.consumeWith`](https://github.com/Functional-Feline-Society/santas-stream/blob/5ef37d2b046446a693ad076b1ccef901d46d6152/src/main/scala/com/northpole/santas/BehaviourReportConsumer.scala#L27) we’re going to:
+
+* Create our consumer
+* Specify what to do with the consumed messages
+* Commit the record offsets after they’ve been processed.
 {% highlight scala %}
 
 def consumeWith(processReport: (FullName, BehaviourReport) => IO[Unit]): 
@@ -75,26 +85,22 @@ Resource[IO, fs2.Stream[IO, Unit]] =
 
 {% endhighlight %}
 
-Further down in `consumeWith` we’re going to:
+As you can see in the snippet above, we first create a consumer resource and then subscribe to our behaviour report topic so that it looks for new messages.
+We’ve used FS2’s [`evalTap`](https://www.javadoc.io/doc/co.fs2/fs2-docs_2.13/3.5.0/fs2/Stream.html#evalTap[F2[x]%3E:F[x],O2](f:O=%3EF2[O2])(implicitevidence$9:cats.Functor[F2]):fs2.Stream[F2,O]) - this is a method on `Stream` that lets us evaluate an `F[_]` for its side effects and keeps hold of original value.
 
-* Create our consumer
-* Specify what to do with the consumed messages
-* Commit the record offsets after they’ve been processed.
+In the last step, we get the stream of records using `_.stream` and tap each message with `processReport`to save it before finally passing it through to `commitBatchWithin`.
 
-As you can see on the snippet above, we first create a consumer resource and then subscribe to our behaviour report topic so that it looks for new messages.
-We’ve used  FS2’s [`evalTap`](https://www.javadoc.io/doc/co.fs2/fs2-docs_2.13/3.5.0/fs2/Stream.html#evalTap[F2[x]%3E:F[x],O2](f:O=%3EF2[O2])(implicitevidence$9:cats.Functor[F2]):fs2.Stream[F2,O]) - this is a method on `Stream` that lets us evaluate an `F[_]` for its side effects and keeps hold of original value.
-In the last step, we get the record stream using `_.stream` and tap each message with `processReport`to save it before finally passing it through to `commitBatchWithin`.
- `commitBatchWithin` is a helper from FS2-Kafka which returns a `Pipe` that takes care of committing your offsets in batches (of either max batch size or after the max interval elapses).  It also takes care of ensuring that commits are sent in their original ordering.
+`commitBatchWithin` is a helper from FS2-Kafka which returns a `Pipe` that takes care of committing your offsets in batches (of either max batch size or after the max interval elapses).  It also takes care of ensuring that commits are sent in their original ordering.
 An FS2 Pipe is a lambda function that describes how to transform one FS2 Stream into another FS2 Stream. 
 
-Some of you may be wondering why `consumeWithin` returns a `Resource[IO, fs2.Stream[IO, Unit]]`  instead of a flattened Stream - which we could’ve achieved with `Stream.resource` and `flatMap`.  This is because we’d like our application’s bootstrapper and tests to be able to identify when Consumers have been allocated/started - which would be difficult with a flattened Stream.
+Some of you may be wondering why `consumeWithin` returns a `Resource[IO, fs2.Stream[IO, Unit]]`  instead of a flattened Stream - which we could’ve achieved with `Stream.resource` and `flatMap/flatten`.  This is because we’d like our application’s bootstrapper and tests to be able to identify when Consumers have been allocated/started - which would be difficult with a flattened Stream.
 
 ## Producer
 
 We will revise our integration tests approach in a separate post, however, we wanted to show  how to publish messages to Kafka.
-Have a look at `NaughtyNiceReportSpec.scala`. We'll start by looking at how we configure and use our producer.
+Have a look at [`NaughtyNiceReportSpec.scala`](https://github.com/Functional-Feline-Society/santas-stream/blob/5ef37d2b046446a693ad076b1ccef901d46d6152/src/it/scala/com/northpole/santas/NaughtyNiceReportSpec.scala). We'll start by looking at how we configure and use our producer.
 
-We first set up our schema registry configuration for avro and our serialisers just like we did earlier in the consumer example. (Lines 65 - 77)
+We first set up our schema registry configuration for avro and our serialisers just like we did earlier in the consumer example.
 
 {% highlight scala %}
 
@@ -104,7 +110,7 @@ val avroSettings = AvroSettings(
 
 {% endhighlight %}
 
-Then, we need to create a `ProducerSettings` instance to capture these serialisers and configure how to connect to the Kafka cluster. (Lines 80-87)
+Then, we need to create a `ProducerSettings` instance to capture these serialisers and configure how to connect to the Kafka cluster.
 
 {% highlight scala %}
 
