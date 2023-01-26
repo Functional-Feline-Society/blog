@@ -1,7 +1,7 @@
 ---
 author: Bones, Dog and Megachu
 date: 2023-01-24 08:48:00+00:00
-title:  "Case study: The digital transformation of Santa's logistical nightmare - Part 3 fs2-kafka"
+title:  "F[F[S]] Kafka! - Case study: The digital transformation of Santa's logistical nightmare - Part 3 fs2-kafka"
 categories:
 - scala
 - scala-cats
