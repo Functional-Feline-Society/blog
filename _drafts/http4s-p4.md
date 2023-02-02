@@ -90,3 +90,7 @@ Under the hood, we are using Circe to decode the incoming data. As explained in 
 
 
 
+## Cat tax
+
+And finally the reason you are really here, to see pictures of us (Bones, Dog & Megachu)!
+
