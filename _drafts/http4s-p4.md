@@ -15,7 +15,6 @@ categories:
 
 
 
-
 Case study: The digital transformation of Santa’s logistical nightmare - Part 4
 
 Welcome to part three of the series:
@@ -35,7 +34,7 @@ Http4s also has some options when it comes to different backends. Most people ha
 
 ## Setting up the Server
 
-Whilst the http4s API is not completely intuitive, I have to check the docs every time I want to set up a Server, the requirements of the API do read well once they are written. To configure our server we do the following:
+Whilst the http4s API is not completely intuitive (I have to check the docs every time I want to set up a Server, or build a uri with query params) the requirements of the API do read well once they are written. To configure our server we do the following:
 
 ### Server builder
 {% highlight scala %}
@@ -86,30 +85,33 @@ In `SantasRoutes.scala` we can find the snippet below.
         )
 {% endhighlight %}
 
-Line 11 has a lot to unpack - the pattern match here is saying that we want to match `GET` requests for resources that match `/list` with an additional two trailing segments that we wish to capture as path variables.
+There is a bit to unpack here - the pattern match is saying that we want to match `GET` requests for resources that match `/list` with an additional two trailing segments that we wish to capture as path variables.
 
-Lines 12 and 13 then say that we want to respond with a 200 OK containing whatever we find when we call `getConsignment` with the full name provided in path variables.
+The following lines then say that we want to respond with a 200 OK containing whatever we find when we call `getConsignment` with the full name provided in path variables.
 At this point you may be wondering how our `IO[ChristmasConsignment]` is converted into an actual HTTP response.
 
 The http4s DSL expects an EntityEncoder to be available for whatever entity you provide to apply - in our case it’s expecting a EntityEncoder[IO, List[FullName]]. This is being derived from our Circe json Encoder using the CirceEntityCodec.circeEntityEncoder method. Our Circe codecs are being derived semi-automatically in `domain.scala` using macros from circe-generic. 
+
 ## Setting up the Client
 
 We use the http4s [Client](https://http4s.org/v0.23/docs/client.html) for testing purposes, we will talk more about our approach to testing in a future post.
 
 Setting up a client is not too different from the builder pattern used to create a server. 
 
+{% highlight scala %}
 val clientResource: Resource[IO, Client[IO]] = EmberClientBuilder.default[IO].build
-
+{% endhighlight %}
 
 In the line above we create the Client resource, we specify we are using IO for effects. When we use the Client, it will result in the creation of a connection pool. This would enable the reuse of connections for multiple requests. It is a common (good) practice to create one client and reuse it in your app (we haven’t done this for testing, probably because we are a bit lazy, after all we are 🐱🐱🐱 cats).
 
-
+{% highlight scala %}
 clientResource.use { client =>
  client.expect[List[FullName]](
    baseUri.withPath(
      Path.unsafeFromString(
        s"/house/${URLEncoder.encode(address.address, "UTF-8")}")))
 }
+{% endhighlight %}
 
 When we are calling `expect` we are saying we expect the response to be decoded without errors to a `List[FullName]`  the parameter for it is a `Uri` in this case, we already have a baseUri in scope. This version of `expect` that takes a `Uri` as a parameter will make a `Get` request. There are alternative versions of `expect` that accept a `Request[IO]` which lets you choose the HTTP method.
 
