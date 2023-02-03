@@ -1,7 +1,7 @@
 ---
 author: Bones, Dog and Megachu
 date: 2023-01-24 08:48:00+00:00
-title:  "F[F[S]] Kafka! - Case study: The digital transformation of Santa's logistical nightmare - Part 3 fs2-kafka"
+title:  "http4s - Case study: The digital transformation of Santa's logistical nightmare - Part 4 http4s"
 categories:
 - scala
 - scala-cats
@@ -23,11 +23,10 @@ Welcome to part three of the series:
 [Part 2 - The digital transformation of Santa’s logistical nightmare - Part 2 - Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
 [Part 3 - F[F[S]] Kafka! - Case study: The digital transformation of Santa’s logistical nightmare - Part 3 fs2-kafka](https://functional-feline-society.github.io/2023/01/24/fs2-kafka/)
 
-In this blog post, we’d like to go through how Santa’s workshop makes use of [http4s]().
+In this blog post, we’d like to go through how Santa’s workshop makes use of [http4s](https://http4s.org).
 
 
 ## General things we want to say about http4s.
-
 
 There are many options when it comes to Web servers in Scala, we are most familiar with http4s and also we think it works well with the rest of the Typelevel stack. Which means it works well with Cats Effect.
 
@@ -38,27 +37,56 @@ Http4s also has some options when it comes to different backends. Most people ha
 
 Whilst the http4s API is not completely intuitive, I have to check the docs every time I want to set up a Server, the requirements of the API do read well once they are written. To configure our server we do the following:
 
-/.. Insert server code
+### Server builder
+{% highlight scala %}
 server <- EmberServerBuilder
- .default[IO]              // create instance
- .withHost(ipv4"0.0.0.0")  // setup 
- .withPort(port"8080")
- .withHttpApp(httpApp)
- .build
+  .default[IO]
+  .withHost(ipv4"0.0.0.0")
+  .withPort(port"8080")
+  .withHttpApp(httpApp)
+  .build
+{% endhighlight %}
 
-
-
-
-We first need to choose a backend, we chose Ember. Then we use the builder pattern provided by http4s to create a server. You will notice there is an `httpApp` parameter. 
-If you inspect the type for `httpApp` you will find that it’s a Kleisli[IO, Request[IO], Response[IO]] - [Kleisli](https://typelevel.org/cats/datatypes/kleisli.html) is a case class wrapping Request[IO] => IO[Response[IO]]. Kleisli can be used to leverage a number of combinators and typeclasses provided by cats-core - e.g. SemigroupK for combining Routes.
-If you want to know more about Kleisli go [here](INSERT A GOOD LINK), for practical purposes you can think of it as a way to mount the routes, deal with some errors, etc. 
-It is also possible to combine routes(because kleisli) using the `<+>` combinator from `SemigroupK` between routes, which is really handy in more complex scenarios. There is an example of it in [the http4s docs](https://http4s.org/v0.23/docs/service.html#running-your-service)
-
-Our httpApp is composed of a combined set of routes that dictate how Requests should be handled, as well as a fallback in the event no routes are matched `.orNotFound`.  As can be seen on lines 25:27 of SantasServer.scala.
+We first need to choose a backend, we chose [Ember](https://mvnrepository.com/artifact/org.http4s/http4s-ember-server). 
+Then we use the builder pattern provided by http4s to create a server.
+Here we specify the interface and port to bind to (`0.0.0.0` & `8080`) as well as the http application to expose.
 Finally, `.build` constructs our `Resource[IO, Server]` object that encapsulates how to start and safely shutdown our web server.
 
+### A little about Kleisli's
+Towards the end of the code snippet above you will notice there is an `httpApp` parameter being passed to `withHttpApp`. 
+If you inspect the type for `httpApp` you will find that it’s a `Kleisli[IO, Request[IO], Response[IO]]`. 
+[Kleisli](https://typelevel.org/cats/datatypes/kleisli.html) is a case class wrapping `Request[IO] => IO[Response[IO]]`. `Kleisli` can be used to leverage a number of combinators and typeclasses provided by cats-core - e.g. `SemigroupK` for combining Routes.
 
-Moving on to `SantasRoutes.scala` we can see an example of how to define a Route that matches a GET request. Line 11 has a lot to unpack - the pattern match here is saying that we want to match `GET` requests for resources that match `/list` with an additional two trailing segments that we wish to capture as path variables.
+For practical purposes you can think of `Kleisli` as a way to mount the routes, deal with some errors, etc.
+It is also possible to combine routes using the `<+>` combinator from `SemigroupK` between routes as seen in [the example in the http4s docs](https://http4s.org/v0.23/docs/service.html#running-your-service).
+
+If you'd like to learn more about Kleisli check out the video [here](https://www.youtube.com/watch?v=qL6Viix3npA). 
+
+### Routes
+Our httpApp is composed of a combined set of routes that dictate how Requests should be handled, as well as a fallback in the event no routes are matched `.orNotFound` - as seen in the snippet below.
+
+{% highlight scala %}
+httpApp = Router(
+  "/"         -> SantasRoutes.ledger(addressBookService, consignmentService),
+  "/internal" -> StatusRoutes.route
+).orNotFound
+{% endhighlight %}
+
+`Router` lets us combine routes under a specified prefix for each route.
+
+Lets look at an example of how to define a Route that matches a GET request.
+In `SantasRoutes.scala` we can find the snippet below.
+
+{% highlight scala %}
+  def ledger(addressBookService: SantasAddressBookService, consignmentService: ConsignmentService): HttpRoutes[IO] =
+    HttpRoutes.of[IO] {
+      case GET -> Root / "list" / lastName / firstName =>
+        Ok(
+          consignmentService.getConsignment(FullName(firstName, lastName))
+        )
+{% endhighlight %}
+
+Line 11 has a lot to unpack - the pattern match here is saying that we want to match `GET` requests for resources that match `/list` with an additional two trailing segments that we wish to capture as path variables.
 
 Lines 12 and 13 then say that we want to respond with a 200 OK containing whatever we find when we call `getConsignment` with the full name provided in path variables.
 At this point you may be wondering how our `IO[ChristmasConsignment]` is converted into an actual HTTP response.
