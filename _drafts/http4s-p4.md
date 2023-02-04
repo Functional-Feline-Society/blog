@@ -1,6 +1,6 @@
 ---
 author: Bones, Dog and Megachu
-date: 2023-01-24 08:48:00+00:00
+date: 2023-02-06 08:48:00+00:00
 title:  "http4s - Case study: The digital transformation of Santa's logistical nightmare - Part 4 http4s"
 categories:
 - scala
