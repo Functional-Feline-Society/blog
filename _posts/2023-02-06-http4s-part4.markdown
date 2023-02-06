@@ -122,7 +122,7 @@ Under the hood, we are using Circe to decode the incoming data. As explained in 
 
 # Conclusion
 
-We are hoping that this series of posts are helping you, understand not just how to do this but why we wrote the code in the way we did. After all, there are many ways to solve any problem, and good solutions have a context. 
+We are hoping that this series of posts are helping you understand not just how to use these tools but why we wrote the code in the way we did. After all, there are many ways to solve any problem, and solutions have a context. 
 
 At the time of writing this, Http4s is very close to `1.0` and after many years of using it, you can really feel the thought and care that has gone to it. Thanks to everyone that make that possible... so I guess all we can do is pay it with Cat Tax.
 
