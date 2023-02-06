@@ -1,6 +1,6 @@
 ---
 author: Bones, Dog and Megachu
-date: 2023-02-06 08:48:00+00:00
+date: 2023-02-06 05:48:00+00:00
 title:  "http4s - Case study: The digital transformation of Santa's logistical nightmare - Part 4 http4s"
 categories:
 - scala
@@ -18,9 +18,9 @@ categories:
 Case study: The digital transformation of Santa’s logistical nightmare - Part 4
 
 Welcome to part four of the series:
-[Part 1 - The digital transformation of Santa’s logistical nightmare - Part - Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
-[Part 2 - The digital transformation of Santa’s logistical nightmare - Part 2 - Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
-[Part 3 - F[F[S]] Kafka! - Case study: The digital transformation of Santa’s logistical nightmare - Part 3 fs2-kafka](https://functional-feline-society.github.io/2023/01/24/fs2-kafka/)
+- [Part 1 - The digital transformation of Santa’s logistical nightmare - Part - Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
+- [Part 2 - The digital transformation of Santa’s logistical nightmare - Part 2 - Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
+- [Part 3 - F[F[S]] Kafka! - Case study: The digital transformation of Santa’s logistical nightmare - Part 3 fs2-kafka](https://functional-feline-society.github.io/2023/01/24/fs2-kafka/)
 
 In this blog post, we’d like to go through how Santa’s workshop makes use of [http4s](https://http4s.org).
 
@@ -29,9 +29,9 @@ In this blog post, we’d like to go through how Santa’s workshop makes use of
 
 There are many options when it comes to Web servers in Scala, we are most familiar with http4s and it works well with the rest of the Typelevel stack. Which means it works well with Cats Effect.
 
-As with most web servers, you are provided with an API to deal with making HTTP requests, the Client side. And serving those requests,the Server side. 
+As with most web servers, you are provided with APIs to deal with sending and receiving HTTP requests, known respectively as the client side and the server side. 
 
-Http4s has options when it comes to different backends. Most people use Blaze, which is based on Netty. But the future is with Ember which is based on an FS2 wrapper around [NIO](https://docs.oracle.com/en/java/javase/15/core/java-nio.html). For the purposes of this Toy example we chose [Ember](https://mvnrepository.com/artifact/org.http4s/http4s-ember-server). 
+Http4s has a few options when it comes to backends - these are the underlying technologies used to implement the http4s core interfaces. Most people use Blaze, which is based on Netty. But the future is with Ember which is based on an FS2 wrapper around [NIO](https://docs.oracle.com/en/java/javase/15/core/java-nio.html). For the purposes of this Toy example we chose [Ember](https://mvnrepository.com/artifact/org.http4s/http4s-ember-server). 
 
 ## Setting up the Server
 
@@ -48,7 +48,7 @@ server <- EmberServerBuilder
 {% endhighlight %}
 
 
-We use the builder pattern provided by http4s to create a server. Here we specify the interface and port to bind to (`0.0.0.0` & `8080`) as well as the http application to expose.
+We use the builder pattern provided by our chosen http4s backend to create a server. Here we specify the interface and port to bind to (`0.0.0.0` & `8080`) as well as the http application to expose.
 Finally, `.build` constructs our `Resource[IO, Server]` object that encapsulates how to start and safely shutdown our web server.
 
 ### What's this httpApp?
@@ -71,7 +71,7 @@ httpApp = Router(
 ).orNotFound
 {% endhighlight %}
 
-`Router` lets us combine routes under a specified prefix for each route. In this case we have all the routes relating to Santa's logistical problems , `/` and then we have some status routes in `/internal` meaning that we will find the status of the app in `<host:port>/internal/status`.
+`Router` lets us combine routes under a specified prefix for each route. In this case we have all the routes relating to Santa's logistical problems, `/` and then we have some status routes in `/internal` meaning that we will find the status of the app in `<host:port>/internal/status`.
 
 Lets look at an example of how to define a Route that matches a GET request.
 In `SantasRoutes.scala` we can find the snippet below.
@@ -128,17 +128,14 @@ At the time of writing this, Http4s is very close to `1.0` and after many years 
 
 ## Cat tax
 
-And finally the reason you are really here, to see pictures of us (Bones, Dog & Megachu)!
+And finally the reason you are really here, to see pictures of us (Bones & Megachu)!
 
 <div>
   <div style="display: flex; flex-direction: row; flex-wrap: wrap;width: 100%;">
-    <div style="display: flex; flex-direction: column; flex-basis: 100%; flex: 1; background-position: 99% 75%; background-size: cover; background-image: url(https://functional-feline-society.github.io/images/megachu-3.jpeg);">
+    <div style="display: flex; flex-direction: column; flex-basis: 100%; flex: 1; background-position: 99% 40%; background-size: cover; background-image: url(https://functional-feline-society.github.io/images/megachu-3.jpeg);">
     </div>
     <div style="display: flex; flex-direction: column; flex-basis: 100%; flex: 1;">
-      <img src="https://raw.githubusercontent.com/K1nd/k1nd.github.io/gh-pages/assets/images/Bones.jpg" alt="Bones">
-    </div>
-    <div style="display: flex; flex-direction: column; flex-basis: 100%; flex: 1;">
-      <img src="https://raw.githubusercontent.com/K1nd/k1nd.github.io/gh-pages/assets/images/Dog.jpg" alt="Dog">
+      <img src="https://functional-feline-society.github.io/images/naughty-bones.jpeg" alt="Bones">
     </div>
   </div>
   <div style="display: flex; flex-direction: row; flex-wrap: wrap;width: 100%;">
@@ -147,9 +144,6 @@ And finally the reason you are really here, to see pictures of us (Bones, Dog & 
     </div>
     <div style="display: flex; flex-direction: column; flex-basis: 100%; flex: 1; text-align: center;">
       Bones
-    </div>
-    <div style="display: flex; flex-direction: column; flex-basis: 100%; flex: 1; text-align: center;">
-      Dog
     </div>
 </div>
 <div style="flex-direction: column; flex-basis: 100%; flex: 1; text-align: center; padding:5em">
