@@ -90,7 +90,9 @@ There is a bit to unpack here - the pattern match is saying that we want to matc
 The following lines then say that we want to respond with a 200 OK containing whatever we find when we call `getConsignment` with the full name provided in path variables.
 At this point you may be wondering how our `IO[ChristmasConsignment]` is converted into an actual HTTP response.
 
-The http4s DSL expects an EntityEncoder to be available for whatever entity you provide to apply - in our case it’s expecting a EntityEncoder[IO, List[FullName]]. This is being derived from our Circe json Encoder using the CirceEntityCodec.circeEntityEncoder method. Our Circe codecs are being derived semi-automatically in `domain.scala` using macros from circe-generic. 
+The http4s DSL expects an `EntityEncoder` to be available for whatever entity you provide to apply - in our case it’s expecting a `EntityEncoder[IO, List[FullName]]`. 
+This is being derived from our Circe json `Encoder` using the `CirceEntityCodec.circeEntityEncoder` method. 
+Our Circe codecs are being derived semi-automatically in `domain.scala` using macros from circe-generic. 
 
 ## Setting up the Client
 
