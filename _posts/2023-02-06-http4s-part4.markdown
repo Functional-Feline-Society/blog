@@ -114,7 +114,7 @@ clientResource.use { client =>
 }
 {% endhighlight %}
 
-When calling `expect` we are saying we expect the response to be decoded without errors to a `List[FullName]. 
+When calling `expect` we are saying we expect the response to be decoded without errors to a `List[FullName]`. 
 This version of `expect` that takes a `Uri` as a parameter will make a `Get` request. There are alternative versions of `expect` that accept a `Request[IO]` which lets you choose the HTTP method.
 
 Under the hood, we are using Circe to decode the incoming data. As explained in the previous section, circe is nicely integrated into http4s. 
