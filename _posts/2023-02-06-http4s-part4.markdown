@@ -15,7 +15,7 @@ categories:
 
 Welcome to part four of the series:
 
-In this blog post, we’d like to go through how Santa’s workshop makes use of [http4s](https://http4s.org). We'll go over how to setup a server and a client, some interesting things about the internals of `httpApp`, how we encode and decode, and as usual some excellent pictures of cats.
+In this blog post, we’d like to go through how Santa’s workshop makes use of [http4s](https://http4s.org). We'll go over how to setup a server and a client, some interesting things about the internals of `httpApp`, how we encode and decode, and as usual some excellent pictures of cats. [Related repository]()
 
 See the previous posts on this series
 
@@ -28,9 +28,9 @@ See the previous posts on this series
 
 ## General things we want to say about http4s
 
-There are many options when it comes to Web servers in Scala; we are most familiar with http4s and it works well with the rest of the Typelevel stack. Which means it works well with Cats Effect.
+There are many options when it comes to Web servers in Scala; we are most familiar with http4s. It works well with the rest of the Typelevel stack, which means it works well with Cats Effect.
 
-As with most web servers, you are provided with APIs to deal with sending and receiving HTTP requests, known respectively as the client side and the server side. 
+As with most web servers you are provided with APIs to deal with sending and receiving HTTP requests, known respectively as the client side and the server side. 
 
 Http4s has a few options when it comes to backends — these are the underlying technologies used to implement the http4s core interfaces. 
 Most people use Blaze, which is based on Netty. But the future is with Ember which is based on an FS2 wrapper around [NIO](https://docs.oracle.com/en/java/javase/15/core/java-nio.html). 
@@ -51,23 +51,24 @@ server <- EmberServerBuilder
 {% endhighlight %}
 
 
-We use the builder pattern provided by our chosen http4s backend to create a server. Here we specify the interface and port to bind to (`0.0.0.0` & `8080`) as well as the http application to expose.
-Finally, `.build` constructs our `Resource[IO, Server]` object that encapsulates how to start and safely shutdown our web server.
+We use the builder pattern provided by our chosen http4s backend to create a server. Here we specify the interface and port to bind to (`0.0.0.0` & `8080` respectively). As well as the http application to expose.
+Finally, `build` constructs our `Resource[IO, Server]` object that encapsulates how to start and safely shutdown our web server.
 
 ### What's this httpApp?
 
-Towards the end of the code snippet above you will notice there is an `httpApp` parameter being passed to `.withHttpApp`. 
+Towards the end of the code snippet above you will notice there is an `httpApp` parameter being passed to `withHttpApp`. 
 If you inspect the type for `httpApp` you will find that it’s a `Kleisli[IO, Request[IO], Response[IO]]`. 
 [Kleisli](https://typelevel.org/cats/datatypes/kleisli.html) is a case class wrapping `Request[IO] => IO[Response[IO]]`. 
-`Kleisli` can be used to leverage a number of combinators and typeclasses provided by cats-core - e.g. `SemigroupK` for combining Routes.
+`Kleisli` can be used to leverage a number of combinators and typeclasses provided by `cats-core` - for example `SemigroupK` for combining Routes.
 
 For practical purposes and for this instance, you can think of `Kleisli` as a way to mount the routes, deal with some errors, etc.
 It is also possible to combine routes using the `<+>` combinator (from `SemigroupK`) between routes as seen in [the example in the http4s docs](https://http4s.org/v0.23/docs/service.html#running-your-service).
 
-If you'd like to learn more about `Kleisli` check out the video [here](https://www.youtube.com/watch?v=qL6Viix3npA). 
+If you'd like to learn more about `Kleisli` check out this [video](https://www.youtube.com/watch?v=qL6Viix3npA) from Alex. 
 
 ### Routes
-Our httpApp is composed of a combined set of routes that describe how Requests should be handled, as well as a fallback in the event no routes are matched `.orNotFound` - as seen in the snippet below.
+
+Our `httpApp` is composed of a combined set of routes that describe how `Requests` should be handled, as well as a fallback in the event no routes are matched `orNotFound` - as seen in the snippet below.
 
 {% highlight scala %}
 httpApp = Router(
