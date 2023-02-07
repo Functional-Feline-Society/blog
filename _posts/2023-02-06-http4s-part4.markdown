@@ -18,14 +18,14 @@ categories:
 Case study: The digital transformation of Santa’s logistical nightmare - Part 4
 
 Welcome to part four of the series:
-- [Part 1 - The digital transformation of Santa’s logistical nightmare - Part - Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
-- [Part 2 - The digital transformation of Santa’s logistical nightmare - Part 2 - Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
-- [Part 3 - F[F[S]] Kafka! - Case study: The digital transformation of Santa’s logistical nightmare - Part 3 fs2-kafka](https://functional-feline-society.github.io/2023/01/24/fs2-kafka/)
+- [Part 1 - The digital transformation of Santa’s logistical nightmare. Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
+- [Part 2 - The digital transformation of Santa’s logistical nightmare.  Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
+- [Part 3 - F[F[S]] Kafka! - The digital transformation of Santa’s logistical nightmare - Part 3 fs2-kafka](https://functional-feline-society.github.io/2023/01/24/fs2-kafka/)
 
 In this blog post, we’d like to go through how Santa’s workshop makes use of [http4s](https://http4s.org).
 
 
-## General things we want to say about http4s.
+## General things we want to say about http4s
 
 There are many options when it comes to Web servers in Scala; we are most familiar with http4s and it works well with the rest of the Typelevel stack. Which means it works well with Cats Effect.
 
@@ -35,7 +35,7 @@ Http4s has a few options when it comes to backends — these are the underlying 
 Most people use Blaze, which is based on Netty. But the future is with Ember which is based on an FS2 wrapper around [NIO](https://docs.oracle.com/en/java/javase/15/core/java-nio.html). 
 For the purposes of this Toy example we chose [Ember](https://mvnrepository.com/artifact/org.http4s/http4s-ember-server). 
 
-## Setting up the Server
+## Setting up the server
 
 Whilst the http4s API is not completely intuitive (I have to check the docs every time, might be just me tho) the requirements of the API do read well once they are written. To configure our server we do the following:
 
@@ -54,6 +54,7 @@ We use the builder pattern provided by our chosen http4s backend to create a ser
 Finally, `.build` constructs our `Resource[IO, Server]` object that encapsulates how to start and safely shutdown our web server.
 
 ### What's this httpApp?
+
 Towards the end of the code snippet above you will notice there is an `httpApp` parameter being passed to `.withHttpApp`. 
 If you inspect the type for `httpApp` you will find that it’s a `Kleisli[IO, Request[IO], Response[IO]]`. 
 [Kleisli](https://typelevel.org/cats/datatypes/kleisli.html) is a case class wrapping `Request[IO] => IO[Response[IO]]`. 
@@ -98,7 +99,7 @@ The http4s DSL expects an `EntityEncoder` to be available for whatever entity yo
 This is being derived from our Circe json `Encoder` using the `CirceEntityCodec.circeEntityEncoder` method. 
 Our Circe codecs are being derived semi-automatically in `domain.scala` using macros from circe-generic. 
 
-## Setting up the Client
+## Setting Up The client
 
 We'll explore our testing approach in a future post but for now I'd like to direct you to `NaughtyNiceReportSpec.scala` to see an example of using an http4s [Client](https://http4s.org/v0.23/docs/client.html).
 
