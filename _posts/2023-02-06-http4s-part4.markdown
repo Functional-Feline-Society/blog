@@ -101,7 +101,7 @@ Our Circe codecs are being derived semi-automatically in `domain.scala` using ma
 
 ## Setting Up The client
 
-We'll explore our testing approach in a future post but for now I'd like to direct you to `NaughtyNiceReportSpec.scala` to see an example of using an http4s [Client](https://http4s.org/v0.23/docs/client.html).
+We'll explore our testing approach in a future post but for now we'd like to direct you to `NaughtyNiceReportSpec.scala` to see an example of using an http4s [`client`](https://http4s.org/v0.23/docs/client.html).
 
 Setting up a client is not too different from the builder pattern used previously to create a server. 
 
@@ -110,8 +110,8 @@ val clientResource: Resource[IO, Client[IO]] = EmberClientBuilder.default[IO].bu
 {% endhighlight %}
 
 In the line above we create the Client resource and specify we are using IO for effects. 
-When we `.use` the Client, it will result in the creation of a connection pool. This would enable the reuse of connections for multiple requests. 
-It is good practice to create one client and reuse it in your app (we haven’t done this for testing, probably because we are a bit lazy, after all we are 🐱🐱🐱 cats).
+When we `.use` the Client, it will result in the creation of a connection pool. This enables the reuse of connections for multiple requests. 
+It is good practice to create one client and reuse it in your app. (But we haven’t done this for testing, probably because we are a bit lazy, after all we are 🐱🐱🐱 cats).
 
 {% highlight scala %}
 clientResource.use { client =>
@@ -124,16 +124,16 @@ clientResource.use { client =>
 
 When calling `expect` we are saying we expect the response to be decoded without errors to a `List[FullName]`. 
 This version of `expect` that takes a `Uri` as a parameter will make a `Get` request. 
-There are alternative versions of `expect` that accept a `Request[IO]` which lets you choose the HTTP method.
+There are alternative versions of `expect` that accept a `Request[IO]` which lets us choose the HTTP method.
 
 Under the hood, we are using Circe to decode the incoming data. As explained in the previous section, Circe is nicely integrated into http4s. 
 
 
 # Conclusion
 
-We are hoping that this series of posts are helping you understand not just how to use these tools but why we wrote the code in the way we did. After all, there are many ways to solve any problem, and solutions have a context. 
+We hope that this series is helping you understand not just how to use these tools but why we wrote the code in the way we did. After all, there are many ways to solve any problem, and solutions have a context. 
 
-At the time of writing this, Http4s is very close to `1.0` and after many years of using it, you can really feel the thought and care that has gone to it. Thanks to everyone that made that possible... so I guess all we can do is pay it with Cat Tax.
+At the time of writing this, http4s is very close to `1.0` and after many years of using it, you can really feel the thought and care that has gone to it. Thanks to everyone that made that possible... so I guess all we can do is pay it with Cat Tax.
 
 ## Cat tax
 
