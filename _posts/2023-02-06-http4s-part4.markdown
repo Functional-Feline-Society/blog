@@ -18,9 +18,9 @@ categories:
 Case study: The digital transformation of Santa’s logistical nightmare - Part 4
 
 Welcome to part four of the series:
-- [Part 1 - The digital transformation of Santa’s logistical nightmare. Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
-- [Part 2 - The digital transformation of Santa’s logistical nightmare.  Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
-- [Part 3 - F[F[S]] Kafka! - The digital transformation of Santa’s logistical nightmare - Part 3 fs2-kafka](https://functional-feline-society.github.io/2023/01/24/fs2-kafka/)
+- [Part 1: The digital transformation of Santa’s logistical nightmare. Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
+- [Part 2: The digital transformation of Santa’s logistical nightmare.  Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
+- [Part 3: F[F[S]] Kafka! - The digital transformation of Santa’s logistical nightmare - Part 3 fs2-kafka](https://functional-feline-society.github.io/2023/01/24/fs2-kafka/)
 
 In this blog post, we’d like to go through how Santa’s workshop makes use of [http4s](https://http4s.org).
 
@@ -33,7 +33,7 @@ As with most web servers, you are provided with APIs to deal with sending and re
 
 Http4s has a few options when it comes to backends — these are the underlying technologies used to implement the http4s core interfaces. 
 Most people use Blaze, which is based on Netty. But the future is with Ember which is based on an FS2 wrapper around [NIO](https://docs.oracle.com/en/java/javase/15/core/java-nio.html). 
-For the purposes of this Toy example we chose [Ember](https://mvnrepository.com/artifact/org.http4s/http4s-ember-server). 
+For the purposes of this toy example we chose [Ember](https://mvnrepository.com/artifact/org.http4s/http4s-ember-server). 
 
 ## Setting up the server
 
