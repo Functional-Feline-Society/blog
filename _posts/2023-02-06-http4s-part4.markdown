@@ -61,7 +61,7 @@ If you inspect the type for `httpApp` you will find that it’s a `Kleisli[IO, R
 `Kleisli` can be used to leverage a number of combinators and typeclasses provided by cats-core - e.g. `SemigroupK` for combining Routes.
 
 For practical purposes and for this instance, you can think of `Kleisli` as a way to mount the routes, deal with some errors, etc.
-It is also possible to combine routes using the `<+>` combinator from `SemigroupK` between routes as seen in [the example in the http4s docs](https://http4s.org/v0.23/docs/service.html#running-your-service).
+It is also possible to combine routes using the `<+>` combinator (from `SemigroupK`) between routes as seen in [the example in the http4s docs](https://http4s.org/v0.23/docs/service.html#running-your-service).
 
 If you'd like to learn more about `Kleisli` check out the video [here](https://www.youtube.com/watch?v=qL6Viix3npA). 
 
