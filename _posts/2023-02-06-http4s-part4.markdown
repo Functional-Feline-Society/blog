@@ -13,16 +13,17 @@ categories:
 ---
 
 
-
-
-Case study: The digital transformation of Santa’s logistical nightmare - Part 4
-
 Welcome to part four of the series:
+
+In this blog post, we’d like to go through how Santa’s workshop makes use of [http4s](https://http4s.org). We'll go over how to setup a server and a client, some interesting things about the internals of `httpApp`, how we encode and decode, and as usual some excellent pictures of cats.
+
+See the previous posts on this series
+
 - [Part 1: Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
 - [Part 2: Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
 - [Part 3: F[F[S]] Kafka! fs2-kafka](https://functional-feline-society.github.io/2023/01/24/fs2-kafka/)
 
-In this blog post, we’d like to go through how Santa’s workshop makes use of [http4s](https://http4s.org).
+
 
 
 ## General things we want to say about http4s
