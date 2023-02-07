@@ -39,7 +39,7 @@ For the purposes of this toy example we chose [Ember](https://mvnrepository.com/
 
 Whilst the http4s API is not completely intuitive (I have to check the docs every time; might be just me tho) the requirements of the API do read well once they are written. To configure our server we do the following:
 
-### Server builder
+
 {% highlight scala %}
 server <- EmberServerBuilder
   .default[IO]
