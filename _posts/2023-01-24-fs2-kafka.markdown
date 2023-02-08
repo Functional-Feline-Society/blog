@@ -13,7 +13,7 @@ categories:
 ---
 
 
-Finally, in this post we’ll go through our usage of [FS2-Kafka](https://fd4s.github.io/fs2-kafka/) in consuming behaviour reports. FS2-Kafka is a wrapper for Java’s Kafka library that provides a nice level of abstraction for working with Kafka in the typelevel ecosystem. Together with using [Vulcan](https://fd4s.github.io/vulcan/) to create your [Avro](https://avro.apache.org/) codecs it provides a pleasant development experience.
+In this post we’ll go through our usage of [FS2-Kafka](https://fd4s.github.io/fs2-kafka/) when consuming behaviour reports. FS2-Kafka is a wrapper for Java’s Kafka library that provides a nice level of abstraction for working with Kafka in the Typelevel ecosystem. It uses [Vulcan](https://fd4s.github.io/vulcan/) to create your [Avro](https://avro.apache.org/) codecs to provide a pleasant development experience.
 
 - [Part 1: Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
 - [Part 2: Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
