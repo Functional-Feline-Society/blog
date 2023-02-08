@@ -72,7 +72,10 @@ Our `httpApp` is composed of a combined set of routes that describe how `Request
 
 {% highlight scala %}
 httpApp = Router(
-  "/"         -> SantasRoutes.ledger(addressBookService, consignmentService),
+  "/" -> SantasRoutes.ledger(
+    addressBookService,
+    consignmentService
+  ),
   "/internal" -> StatusRoutes.route
 ).orNotFound
 {% endhighlight %}
@@ -81,15 +84,20 @@ httpApp = Router(
 For example, the status of the app can be found by calling `<host:port>/internal/status`.
 
 Lets look at an example of how to define a Route that matches a `GET` request.
-In `SantasRoutes.scala` we can find the snippet below.
+In [`SantasRoutes.scala`](https://github.com/Functional-Feline-Society/santas-stream/blob/da9315fc88db274cdf8b7b6109fa1f4a98bf1875/src/main/scala/com/northpole/santas/SantasRoutes.scala) we can find the snippet below.
 
 {% highlight scala %}
-  def ledger(addressBookService: SantasAddressBookService, consignmentService: ConsignmentService): HttpRoutes[IO] =
-    HttpRoutes.of[IO] {
-      case GET -> Root / "list" / lastName / firstName =>
-        Ok(
-          consignmentService.getConsignment(FullName(firstName, lastName))
+def ledger(
+    addressBookService: SantasAddressBookService,
+    consignmentService: ConsignmentService
+): HttpRoutes[IO] =
+  HttpRoutes.of[IO] {
+    case GET -> Root / "list" / lastName / firstName =>
+      Ok(
+        consignmentService.getConsignment(
+          FullName(firstName, lastName)
         )
+      )
 {% endhighlight %}
 
 There is a bit to unpack here — the pattern match is saying that we want to match `GET` requests for resources that match `/list` with an additional two trailing segments that we wish to capture as path variables.
@@ -99,16 +107,17 @@ At this point you may be wondering how our `IO[ChristmasConsignment]` is convert
 
 The http4s DSL expects an `EntityEncoder` to be available for whatever entity you pass to `.apply` — in our case it’s expecting a `EntityEncoder[IO, List[FullName]]`. 
 This is being derived from our Circe json `Encoder` using the `CirceEntityCodec.circeEntityEncoder` method. 
-Our Circe codecs are being derived semi-automatically in `domain.scala` using macros from circe-generic. 
+Our Circe codecs are being derived semi-automatically in [`domain.scala`](https://github.com/Functional-Feline-Society/santas-stream/blob/da9315fc88db274cdf8b7b6109fa1f4a98bf1875/src/main/scala/com/northpole/santas/domain.scala) using macros from circe-generic. 
 
 ## Setting Up The client
 
-We'll explore our testing approach in a future post but for now we'd like to direct you to `NaughtyNiceReportSpec.scala` to see an example of using an http4s [`client`](https://http4s.org/v0.23/docs/client.html).
+We'll explore our testing approach in a future post but for now we'd like to direct you to [`NaughtyNiceReportSpec.scala`](https://github.com/Functional-Feline-Society/santas-stream/blob/da9315fc88db274cdf8b7b6109fa1f4a98bf1875/src/it/scala/com/northpole/santas/NaughtyNiceReportSpec.scala) to see an example of using an http4s [`client`](https://http4s.org/v0.23/docs/client.html).
 
 Setting up a client is not too different from the builder pattern used previously to create a server. 
 
 {% highlight scala %}
-val clientResource: Resource[IO, Client[IO]] = EmberClientBuilder.default[IO].build
+val clientResource: Resource[IO, Client[IO]] =
+  EmberClientBuilder.default[IO].build
 {% endhighlight %}
 
 In the line above we create the Client resource and specify we are using IO for effects. 
@@ -117,10 +126,13 @@ It is good practice to create one client and reuse it in your app. (But we haven
 
 {% highlight scala %}
 clientResource.use { client =>
- client.expect[List[FullName]](
-   baseUri.withPath(
-     Path.unsafeFromString(
-       s"/house/${URLEncoder.encode(address.address, "UTF-8")}")))
+  client.expect[List[FullName]](
+    baseUri.withPath(
+      Path.unsafeFromString(
+        s"/house/${URLEncoder.encode(address.address, "UTF-8")}"
+      )
+    )
+  )
 }
 {% endhighlight %}
 
