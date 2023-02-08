@@ -9,9 +9,15 @@ categories:
 - kafka
 - fs2-kafka
 ---
-Welcome to part two of the series. "A series?", you ask. Read all about it by following the link to [part one](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/).
 
 In this blog post, we'd like to go through how Santa's workshop makes use of cats-effect (CE3) to bootstrap itself.
+
+You can check out the rest of the series:
+
+- [Part 1: Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
+- Part 2: This post
+- [Part 3: F[F[S]] Kafka! fs2-kafka](https://functional-feline-society.github.io/2023/01/24/fs2-kafka/)
+- [Part 4: http4s ](https://functional-feline-society.github.io/2023/02/06/http4s-part4/)
 
 Before we get started, we want to say that the [Typelevel documentation](https://typelevel.org/cats-effect/docs/tutorial) on cats-effect is very complete and well written - so we strongly recommend reading through those if you haven't had any exposure to cats-effect.
 

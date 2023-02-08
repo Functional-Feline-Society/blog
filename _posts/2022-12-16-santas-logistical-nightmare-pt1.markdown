@@ -96,4 +96,11 @@ The requirements are as follows:
 ## What's next?
 We'll dive deeper into some of the technologies used over a series of blog posts throughout the festive period. If you have any preference in order, please let us know.
 
+You can find the next posts here
+
+- [Part 1: Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
+- [Part 2: Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
+- [Part 3: F[F[S]] Kafka! fs2-kafka](https://functional-feline-society.github.io/2023/01/24/fs2-kafka/)
+- [Part 4: http4s ](https://functional-feline-society.github.io/2023/02/06/http4s-part4/)
+
 

@@ -12,12 +12,14 @@ categories:
 - vulcan
 ---
 
-Welcome to part three of the series. "A series?" yes, these are the posts we have so far 
-* Santa's logistical nightmare [Introduction - Part 1](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/). Here you can find a high level of the problem we are trying to address and why we are doing this series of posts.
-* Santa's logistical nightmare [Cats Effect - Part 2](https://functional-feline-society.github.io/2022/12/22/io-part-2/). In that post we go over how we use Cats Effect in our example.
-
 
 Finally, in this post we’ll go through our usage of [FS2-Kafka](https://fd4s.github.io/fs2-kafka/) in consuming behaviour reports. FS2-Kafka is a wrapper for Java’s Kafka library that provides a nice level of abstraction for working with Kafka in the typelevel ecosystem. Together with using [Vulcan](https://fd4s.github.io/vulcan/) to create your [Avro](https://avro.apache.org/) codecs it provides a pleasant development experience.
+
+- [Part 1: Introduction](https://functional-feline-society.github.io/2022/12/16/santas-logistical-nightmare-pt1/)
+- [Part 2: Cats Effects](https://functional-feline-society.github.io/2022/12/22/io-part-2/)
+
+
+
 
 ## Consumer 
 
@@ -160,11 +162,7 @@ This is only possible because we are leveraging the powerful constructs provided
 These tools are supposed to make our lives as programmers easier and simpler, they should make it harder for us to make mistakes. 
 As usual, we would really like to know what you learned from this, or whatever questions you might have after reading this post so that we can make it better.
 
-Next post coming soon 🔜
-
-
-
-
+You can now read [Part 4: http4s ](https://functional-feline-society.github.io/2023/02/06/http4s-part4/).
 
 
 ### Cat Tax!
